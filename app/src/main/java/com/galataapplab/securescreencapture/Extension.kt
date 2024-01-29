@@ -15,6 +15,7 @@ fun ComposableLifeCycle(
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
     onEvent: (LifecycleOwner, Lifecycle.Event) -> Unit
 ) {
+    // If `lifecycleOwner` changes, dispose and reset the effect
     DisposableEffect(key1 = lifecycleOwner) {
         val observer = LifecycleEventObserver { source, event ->
             onEvent(source, event)

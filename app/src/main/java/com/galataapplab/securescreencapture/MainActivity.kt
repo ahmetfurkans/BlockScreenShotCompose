@@ -4,27 +4,35 @@ import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.Lifecycle
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.galataapplab.securescreencapture.ui.theme.SecureScreenCaptureTheme
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val navController: NavHostController = rememberNavController()
             SecureScreenCaptureTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                 ) {
-                    ProtectedScreen("Android")
+                    AppNavigation(navController = navController)
                 }
             }
         }
@@ -32,7 +40,25 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun ProtectedScreen(name: String, modifier: Modifier = Modifier) {
+fun AppNavigation(
+    navController: NavHostController,
+    modifier: Modifier = Modifier,
+) {
+    NavHost(
+        navController = navController, startDestination = "A", modifier = modifier
+    ) {
+        composable(route = "A") {
+            UnprotectedScreen(navigateToProtectedScreen = { navController.navigate("B") })
+        }
+        composable(route = "B") {
+            ProtectedScreen()
+        }
+    }
+}
+
+
+@Composable
+fun ProtectedScreen(modifier: Modifier = Modifier) {
 
     val activity = LocalContext.current.findActivity()
 
@@ -52,15 +78,17 @@ fun ProtectedScreen(name: String, modifier: Modifier = Modifier) {
         }
     }
 
-    Text(
-        text = "Hello $name!", modifier = modifier
-    )
+    Text(text = "Screen B")
 }
 
-@Preview(showBackground = true)
 @Composable
-fun ProtectedScreenPreview() {
-    SecureScreenCaptureTheme {
-        ProtectedScreen("Android")
+fun UnprotectedScreen(modifier: Modifier = Modifier, navigateToProtectedScreen: () -> Unit) {
+
+    ComposableLifeCycle { source, event ->
+
     }
+
+    Text(text = "Screen A", modifier = modifier.clickable {
+        navigateToProtectedScreen()
+    })
 }
